@@ -30,19 +30,35 @@ public class ProductService {
     public Optional<Product> getProductById(Long id) {
         return productRepository.findById(id);
     }
+
+    public Product updateProduct(Long id, Product updatedProduct) {
+        return productRepository.findById(id)
+                .map(product -> {
+                    product.setName(updatedProduct.getName());
+                    product.setPrice(updatedProduct.getPrice());
+                    product.setStock(updatedProduct.getStock());
+                    return productRepository.save(product);
+                })
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+    }
+
     public void deleteProduct(Long id) {
         productRepository.deleteById(id);
     }
-    public Page<Product> getProductsWithPaginationAndSorting(int page, int size, String sortBy) {
+
+    public Page<Product> getProductsPaged(int page, int size, String sortBy) {
         return productRepository.findAll(PageRequest.of(page, size, Sort.by(sortBy)));
     }
-    public List<Product> getProductsByPriceGreaterThan(Double price) {
-        return productRepository.findProductsByPriceGreaterThan(price);
-    }
-    public List<Product> getProductsWithStockGreaterThan(Integer stock) {
-        return productRepository.findAll()
-                .stream()
-                .filter(product -> product.getStock() != null && product.getStock() > stock)
-                .toList();
+
+    public void reduceStock(Long productId, Integer quantity) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        if (product.getStock() < quantity) {
+            throw new RuntimeException("Not enough stock");
+        }
+
+        product.setStock(product.getStock() - quantity);
+        productRepository.save(product);
     }
 }

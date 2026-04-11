@@ -37,39 +37,23 @@ public class ProductController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product) {
-        return productService.getProductById(id)
-                .map(existingProduct -> {
-                    existingProduct.setName(product.getName());
-                    existingProduct.setPrice(product.getPrice());
-                    existingProduct.setStock(product.getStock());
-                    return ResponseEntity.ok(productService.createProduct(existingProduct));
-                })
-                .orElse(ResponseEntity.notFound().build());
+        try {
+            return ResponseEntity.ok(productService.updateProduct(id, product));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
-        return productService.getProductById(id)
-                .map(existingProduct -> {
-                    productService.deleteProduct(id);
-                    return ResponseEntity.noContent().<Void>build();
-                })
-                .orElse(ResponseEntity.notFound().build());
+        productService.deleteProduct(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/paged")
-    public Page<Product> getProductsWithPaginationAndSorting(
-            @RequestParam("page") int page,
-            @RequestParam("size") int size,
-            @RequestParam("sortBy") String sortBy) {
-        return productService.getProductsWithPaginationAndSorting(page, size, sortBy);
-    }
-    @GetMapping("/filter/price")
-    public List<Product> getProductsByPriceGreaterThan(@RequestParam Double price) {
-        return productService.getProductsByPriceGreaterThan(price);
-    }
-    @GetMapping("/filter/stock")
-    public List<Product> getProductsWithStockGreaterThan(@RequestParam Integer stock) {
-        return productService.getProductsWithStockGreaterThan(stock);
+    public Page<Product> getProductsPaged(@RequestParam int page,
+                                          @RequestParam int size,
+                                          @RequestParam String sortBy) {
+        return productService.getProductsPaged(page, size, sortBy);
     }
 }
