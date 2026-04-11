@@ -2,6 +2,7 @@ package com.example.product_service.controller;
 
 import com.example.product_service.model.Product;
 import com.example.product_service.service.ProductService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -54,5 +55,18 @@ public class ProductController {
                     return ResponseEntity.noContent().<Void>build();
                 })
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/paged")
+    public Page<Product> getProductsWithPaginationAndSorting(
+            @RequestParam("page") int page,
+            @RequestParam("size") int size,
+            @RequestParam("sortBy") String sortBy) {
+        return productService.getProductsWithPaginationAndSorting(page, size, sortBy);
+    }
+
+    @GetMapping("/filter/stock")
+    public List<Product> getProductsWithStockGreaterThan(@RequestParam Integer stock) {
+        return productService.getProductsWithStockGreaterThan(stock);
     }
 }

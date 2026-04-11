@@ -2,6 +2,9 @@ package com.example.product_service.service;
 
 import com.example.product_service.model.Product;
 import com.example.product_service.repository.ProductRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,5 +32,15 @@ public class ProductService {
     }
     public void deleteProduct(Long id) {
         productRepository.deleteById(id);
+    }
+    public Page<Product> getProductsWithPaginationAndSorting(int page, int size, String sortBy) {
+        return productRepository.findAll(PageRequest.of(page, size, Sort.by(sortBy)));
+    }
+
+    public List<Product> getProductsWithStockGreaterThan(Integer stock) {
+        return productRepository.findAll()
+                .stream()
+                .filter(product -> product.getStock() != null && product.getStock() > stock)
+                .toList();
     }
 }
