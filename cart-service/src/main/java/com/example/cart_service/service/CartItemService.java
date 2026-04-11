@@ -1,6 +1,7 @@
 package com.example.cart_service.service;
 
-import com.example.cart_service.dto.ProductResponse;
+import com.example.cart_service.dto.CartEvent;
+import com.example.cart_service.dto.ProductDto;
 import com.example.cart_service.model.CartItem;
 import com.example.cart_service.repository.CartItemRepository;
 import org.springframework.stereotype.Service;
@@ -14,18 +15,21 @@ public class CartItemService {
 
     private final CartItemRepository cartItemRepository;
     private final WebClient webClient;
+    private final KafkaProducerService kafkaProducerService;
 
-    public CartItemService(CartItemRepository cartItemRepository, WebClient webClient) {
+    public CartItemService(CartItemRepository cartItemRepository,
+                           WebClient webClient,
+                           KafkaProducerService kafkaProducerService) {
         this.cartItemRepository = cartItemRepository;
         this.webClient = webClient;
+        this.kafkaProducerService = kafkaProducerService;
     }
 
     public CartItem createCartItem(CartItem cartItem) {
-
-        ProductResponse product = webClient.get()
+        ProductDto product = webClient.get()
                 .uri("http://localhost:8081/products/" + cartItem.getProductId())
                 .retrieve()
-                .bodyToMono(ProductResponse.class)
+                .bodyToMono(ProductDto.class)
                 .block();
 
         if (product == null) {
@@ -36,15 +40,28 @@ public class CartItemService {
             throw new RuntimeException("Not enough stock");
         }
 
-        return cartItemRepository.save(cartItem);
+        CartItem savedItem = cartItemRepository.save(cartItem);
+
+        CartEvent event = new CartEvent(
+                savedItem.getCartId(),
+                savedItem.getProductId(),
+                savedItem.getQuantity()
+        );
+
+        kafkaProducerService.sendCartEvent(event);
+
+        return savedItem;
     }
+
     public List<CartItem> getAllCartItems() {
         return cartItemRepository.findAll();
     }
-    public List<CartItem> getCartItemsByCartId(Integer cartId) {
-        return cartItemRepository.findByCartId(cartId);
-    }
+
     public Optional<CartItem> getCartItemById(Integer id) {
         return cartItemRepository.findById(id);
+    }
+
+    public List<CartItem> getCartItemsByCartId(Integer cartId) {
+        return cartItemRepository.findByCartId(cartId);
     }
 }
