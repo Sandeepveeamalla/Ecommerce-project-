@@ -36,7 +36,9 @@ public class ProductService {
     public Page<Product> getProductsWithPaginationAndSorting(int page, int size, String sortBy) {
         return productRepository.findAll(PageRequest.of(page, size, Sort.by(sortBy)));
     }
-
+    public List<Product> getProductsByPriceGreaterThan(Double price) {
+        return productRepository.findProductsByPriceGreaterThan(price);
+    }
     public List<Product> getProductsWithStockGreaterThan(Integer stock) {
         return productRepository.findAll()
                 .stream()

@@ -64,7 +64,10 @@ public class ProductController {
             @RequestParam("sortBy") String sortBy) {
         return productService.getProductsWithPaginationAndSorting(page, size, sortBy);
     }
-
+    @GetMapping("/filter/price")
+    public List<Product> getProductsByPriceGreaterThan(@RequestParam Double price) {
+        return productService.getProductsByPriceGreaterThan(price);
+    }
     @GetMapping("/filter/stock")
     public List<Product> getProductsWithStockGreaterThan(@RequestParam Integer stock) {
         return productService.getProductsWithStockGreaterThan(stock);
