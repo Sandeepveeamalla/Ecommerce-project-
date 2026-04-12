@@ -1,6 +1,12 @@
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 
 function Navbar() {
+  const linkStyle = ({ isActive }) => ({
+    textDecoration: 'none',
+    color: isActive ? '#000' : '#333',
+    fontWeight: isActive ? 'bold' : 'normal',
+  });
+
   return (
     <nav
       style={{
@@ -10,9 +16,17 @@ function Navbar() {
         gap: '15px',
       }}
     >
-      <Link to="/products">Products</Link>
-      <Link to="/add-product">Add Product</Link>
-      <Link to="/cart">Cart</Link>
+      <NavLink to="/products" style={linkStyle}>
+        Products
+      </NavLink>
+
+      <NavLink to="/add-product" style={linkStyle}>
+        Add Product
+      </NavLink>
+
+      <NavLink to="/cart" style={linkStyle}>
+        Cart
+      </NavLink>
     </nav>
   );
 }
