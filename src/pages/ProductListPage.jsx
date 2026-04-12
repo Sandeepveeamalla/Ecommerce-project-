@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts } from '../features/products/productSlice.js';
 import { addToCart } from '../features/cart/cartSlice.js';
 import ProductTable from '../components/ProductTable.jsx';
+import Spinner from '../components/Spinner.jsx';
+import ErrorMessage from '../components/ErrorMessage.jsx';
 
 function ProductListPage() {
   const dispatch = useDispatch();
@@ -13,16 +15,19 @@ function ProductListPage() {
   }, [dispatch]);
 
   const handleAddToCart = async (cartItem) => {
-    await dispatch(addToCart(cartItem));
-    alert('Product added to cart');
+    const resultAction = await dispatch(addToCart(cartItem));
+
+    if (addToCart.fulfilled.match(resultAction)) {
+      alert('Product added to cart');
+    }
   };
 
   return (
     <div style={{ padding: '20px' }}>
       <h2>Product List</h2>
 
-      {loading && <p>Loading products...</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {loading && <Spinner />}
+      <ErrorMessage message={error} />
 
       <ProductTable products={items} onAddToCart={handleAddToCart} />
     </div>

@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchCartItems } from '../features/cart/cartSlice.js';
+import Spinner from '../components/Spinner.jsx';
+import ErrorMessage from '../components/ErrorMessage.jsx';
 
 function CartPage() {
   const dispatch = useDispatch();
@@ -14,8 +16,8 @@ function CartPage() {
     <div style={{ padding: '20px' }}>
       <h2>Cart Page</h2>
 
-      {loading && <p>Loading cart items...</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {loading && <Spinner />}
+      <ErrorMessage message={error} />
 
       <table border="1" cellPadding="10" style={{ marginTop: '20px', width: '100%' }}>
         <thead>
