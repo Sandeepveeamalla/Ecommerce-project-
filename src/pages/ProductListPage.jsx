@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts } from '../features/products/productSlice.js';
 import { addToCart } from '../features/cart/cartSlice.js';
@@ -9,6 +9,9 @@ import ErrorMessage from '../components/ErrorMessage.jsx';
 function ProductListPage() {
   const dispatch = useDispatch();
   const { items, loading, error } = useSelector((state) => state.products);
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
 
   useEffect(() => {
     dispatch(fetchProducts());
@@ -22,14 +25,43 @@ function ProductListPage() {
     }
   };
 
+  const filteredProducts = useMemo(() => {
+    return items.filter((product) => {
+      const matchesName = product.name
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+
+      const matchesPrice =
+        maxPrice === '' || product.price <= Number(maxPrice);
+
+      return matchesName && matchesPrice;
+    });
+  }, [items, searchTerm, maxPrice]);
+
   return (
     <div style={{ padding: '20px' }}>
       <h2>Product List</h2>
 
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+        <input
+          type="text"
+          placeholder="Search by product name"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+
+        <input
+          type="number"
+          placeholder="Filter by max price"
+          value={maxPrice}
+          onChange={(e) => setMaxPrice(e.target.value)}
+        />
+      </div>
+
       {loading && <Spinner />}
       <ErrorMessage message={error} />
 
-      <ProductTable products={items} onAddToCart={handleAddToCart} />
+      <ProductTable products={filteredProducts} onAddToCart={handleAddToCart} />
     </div>
   );
 }
