@@ -8,18 +8,19 @@ import ErrorMessage from '../components/ErrorMessage.jsx';
 
 function ProductListPage() {
   const dispatch = useDispatch();
-  const { items, loading, error } = useSelector((state) => state.products);
+  const { items, loading, error, currentPage, totalPages, pageSize } = useSelector(
+    (state) => state.products
+  );
 
   const [searchTerm, setSearchTerm] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
 
   useEffect(() => {
-    dispatch(fetchProducts());
-  }, [dispatch]);
+    dispatch(fetchProducts({ page: currentPage, size: pageSize, sortBy: 'id' }));
+  }, [dispatch, currentPage, pageSize]);
 
   const handleAddToCart = async (cartItem) => {
     const resultAction = await dispatch(addToCart(cartItem));
-
     if (addToCart.fulfilled.match(resultAction)) {
       alert('Product added to cart');
     }
@@ -37,6 +38,22 @@ function ProductListPage() {
       return matchesName && matchesPrice;
     });
   }, [items, searchTerm, maxPrice]);
+
+  const handlePrev = () => {
+    if (currentPage > 0) {
+      dispatch(fetchProducts({ page: currentPage - 1, size: pageSize, sortBy: 'id' }));
+    }
+  };
+
+  const handleNext = () => {
+    if (currentPage < totalPages - 1) {
+      dispatch(fetchProducts({ page: currentPage + 1, size: pageSize, sortBy: 'id' }));
+    }
+  };
+
+  const handlePageClick = (page) => {
+    dispatch(fetchProducts({ page, size: pageSize, sortBy: 'id' }));
+  };
 
   return (
     <div style={{ padding: '20px' }}>
@@ -62,6 +79,26 @@ function ProductListPage() {
       <ErrorMessage message={error} />
 
       <ProductTable products={filteredProducts} onAddToCart={handleAddToCart} />
+
+      <div style={{ marginTop: '20px', display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <button onClick={handlePrev} disabled={currentPage === 0}>
+          Prev
+        </button>
+
+        {Array.from({ length: totalPages }, (_, index) => (
+          <button
+            key={index}
+            onClick={() => handlePageClick(index)}
+            disabled={index === currentPage}
+          >
+            {index + 1}
+          </button>
+        ))}
+
+        <button onClick={handleNext} disabled={currentPage >= totalPages - 1}>
+          Next
+        </button>
+      </div>
     </div>
   );
 }

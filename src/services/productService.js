@@ -2,8 +2,10 @@ import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:8081';
 
-export const getProducts = async () => {
-  const response = await axios.get(`${API_BASE_URL}/products`);
+export const getProducts = async (page = 0, size = 5, sortBy = 'id') => {
+  const response = await axios.get(
+    `${API_BASE_URL}/products?page=${page}&size=${size}&sortBy=${sortBy}`
+  );
   return response.data;
 };
 

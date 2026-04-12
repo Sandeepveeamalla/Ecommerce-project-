@@ -3,9 +3,9 @@ import { getProducts, createProduct } from '../../services/productService.js';
 
 export const fetchProducts = createAsyncThunk(
   'products/fetchProducts',
-  async (_, thunkAPI) => {
+  async ({ page = 0, size = 5, sortBy = 'id' } = {}, thunkAPI) => {
     try {
-      return await getProducts();
+      return await getProducts(page, size, sortBy);
     } catch (error) {
       return thunkAPI.rejectWithValue('Failed to fetch products');
     }
@@ -29,6 +29,9 @@ const productSlice = createSlice({
     items: [],
     loading: false,
     error: null,
+    currentPage: 0,
+    totalPages: 0,
+    pageSize: 5,
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -40,12 +43,18 @@ const productSlice = createSlice({
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.loading = false;
 
-        if (Array.isArray(action.payload)) {
-          state.items = action.payload;
-        } else if (Array.isArray(action.payload.content)) {
+        if (Array.isArray(action.payload.content)) {
           state.items = action.payload.content;
+          state.currentPage = action.payload.number ?? 0;
+          state.totalPages = action.payload.totalPages ?? 1;
+        } else if (Array.isArray(action.payload)) {
+          state.items = action.payload;
+          state.currentPage = 0;
+          state.totalPages = 1;
         } else {
           state.items = [];
+          state.currentPage = 0;
+          state.totalPages = 0;
         }
       })
       .addCase(fetchProducts.rejected, (state, action) => {
