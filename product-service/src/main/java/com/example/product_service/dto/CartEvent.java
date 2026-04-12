@@ -8,7 +8,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CartEvent {
-        private Long cartId;
+    private String eventType;
+    private Long cartId;
         private Long productId;
         private Integer quantity;
     }

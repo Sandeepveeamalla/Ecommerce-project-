@@ -49,6 +49,13 @@ public class ProductService {
     public Page<Product> getProductsPaged(int page, int size, String sortBy) {
         return productRepository.findAll(PageRequest.of(page, size, Sort.by(sortBy)));
     }
+    public void increaseStock(Long productId, Integer quantity) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        product.setStock(product.getStock() + quantity);
+        productRepository.save(product);
+    }
 
     public void reduceStock(Long productId, Integer quantity) {
         Product product = productRepository.findById(productId)

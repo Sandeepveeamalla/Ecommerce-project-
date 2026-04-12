@@ -16,7 +16,13 @@ public class KafkaConsumerService {
     @KafkaListener(topics = "cart-topic", groupId = "product-service-group")
     public void consumeCartEvent(CartEvent event) {
         System.out.println("Received event from Kafka: " + event);
-        productService.reduceStock(event.getProductId(), event.getQuantity());
-        System.out.println("Stock updated for product: " + event.getProductId());
+
+        if ("ADD".equals(event.getEventType())) {
+            productService.reduceStock(event.getProductId().longValue(), event.getQuantity());
+            System.out.println("Stock reduced for product: " + event.getProductId());
+        } else if ("REMOVE".equals(event.getEventType())) {
+            productService.increaseStock(event.getProductId().longValue(), event.getQuantity());
+            System.out.println("Stock increased for product: " + event.getProductId());
+        }
     }
 }
