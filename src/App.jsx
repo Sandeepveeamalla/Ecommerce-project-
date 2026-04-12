@@ -1,7 +1,11 @@
+import Navbar from './components/Navbar.jsx';
+import AppRoutes from './routes/AppRoutes.jsx';
+
 function App() {
   return (
     <div>
-      <h1>Frontend App Setup Complete</h1>
+      <Navbar />
+      <AppRoutes />
     </div>
   );
 }
