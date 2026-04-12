@@ -12,6 +12,7 @@ function Navbar() {
     >
       <Link to="/products">Products</Link>
       <Link to="/add-product">Add Product</Link>
+      <Link to="/cart">Cart</Link>
     </nav>
   );
 }

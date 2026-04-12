@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts } from '../features/products/productSlice.js';
+import { addToCart } from '../features/cart/cartSlice.js';
 import ProductTable from '../components/ProductTable.jsx';
 
 function ProductListPage() {
@@ -11,6 +12,11 @@ function ProductListPage() {
     dispatch(fetchProducts());
   }, [dispatch]);
 
+  const handleAddToCart = async (cartItem) => {
+    await dispatch(addToCart(cartItem));
+    alert('Product added to cart');
+  };
+
   return (
     <div style={{ padding: '20px' }}>
       <h2>Product List</h2>
@@ -18,7 +24,7 @@ function ProductListPage() {
       {loading && <p>Loading products...</p>}
       {error && <p style={{ color: 'red' }}>{error}</p>}
 
-      <ProductTable products={items} />
+      <ProductTable products={items} onAddToCart={handleAddToCart} />
     </div>
   );
 }
