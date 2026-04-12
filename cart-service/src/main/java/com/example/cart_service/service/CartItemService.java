@@ -26,11 +26,16 @@ public class CartItemService {
     }
 
     public CartItem createCartItem(CartItem cartItem) {
-        ProductDto product = webClient.get()
-                .uri("http://localhost:8081/products/" + cartItem.getProductId())
-                .retrieve()
-                .bodyToMono(ProductDto.class)
-                .block();
+        ProductDto product;
+        try {
+            product = webClient.get()
+                    .uri("http://localhost:8081/products/" + cartItem.getProductId())
+                    .retrieve()
+                    .bodyToMono(ProductDto.class)
+                    .block();
+        } catch (Exception ex) {
+            throw new RuntimeException("Product not found");
+        }
 
         if (product == null) {
             throw new RuntimeException("Product not found");
@@ -42,7 +47,7 @@ public class CartItemService {
 
         CartItem savedItem = cartItemRepository.save(cartItem);
 
-        CartEvent event = new CartEvent(
+        CartEvent event = new CartEvent("ADD",
                 savedItem.getCartId(),
                 savedItem.getProductId(),
                 savedItem.getQuantity()

@@ -24,7 +24,7 @@ public class CartService {
         return cartRepository.findAll();
     }
 
-    public Optional<Cart> getCartById(Integer id) {
+    public Optional<Cart> getCartById(Long id) {
         return cartRepository.findById(id);
     }
 }
