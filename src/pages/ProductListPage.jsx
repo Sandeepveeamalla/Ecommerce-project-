@@ -1,59 +1,24 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchProducts } from '../features/products/productSlice.js';
-import { addToCart } from '../features/cart/cartSlice.js';
 import ProductTable from '../components/ProductTable.jsx';
 import Spinner from '../components/Spinner.jsx';
 import ErrorMessage from '../components/ErrorMessage.jsx';
+import useProducts from '../hooks/useProducts.js';
 
 function ProductListPage() {
-  const dispatch = useDispatch();
-  const { items, loading, error, currentPage, totalPages, pageSize } = useSelector(
-    (state) => state.products
-  );
-
-  const [searchTerm, setSearchTerm] = useState('');
-  const [maxPrice, setMaxPrice] = useState('');
-
-  useEffect(() => {
-    dispatch(fetchProducts({ page: currentPage, size: pageSize, sortBy: 'id' }));
-  }, [dispatch, currentPage, pageSize]);
-
-  const handleAddToCart = async (cartItem) => {
-    const resultAction = await dispatch(addToCart(cartItem));
-    if (addToCart.fulfilled.match(resultAction)) {
-      alert('Product added to cart');
-    }
-  };
-
-  const filteredProducts = useMemo(() => {
-    return items.filter((product) => {
-      const matchesName = product.name
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
-
-      const matchesPrice =
-        maxPrice === '' || product.price <= Number(maxPrice);
-
-      return matchesName && matchesPrice;
-    });
-  }, [items, searchTerm, maxPrice]);
-
-  const handlePrev = () => {
-    if (currentPage > 0) {
-      dispatch(fetchProducts({ page: currentPage - 1, size: pageSize, sortBy: 'id' }));
-    }
-  };
-
-  const handleNext = () => {
-    if (currentPage < totalPages - 1) {
-      dispatch(fetchProducts({ page: currentPage + 1, size: pageSize, sortBy: 'id' }));
-    }
-  };
-
-  const handlePageClick = (page) => {
-    dispatch(fetchProducts({ page, size: pageSize, sortBy: 'id' }));
-  };
+  const {
+    loading,
+    error,
+    filteredProducts,
+    searchTerm,
+    setSearchTerm,
+    maxPrice,
+    setMaxPrice,
+    currentPage,
+    totalPages,
+    handleAddToCart,
+    goToPrevPage,
+    goToNextPage,
+    goToPage,
+  } = useProducts();
 
   return (
     <div style={{ padding: '20px' }}>
@@ -81,21 +46,21 @@ function ProductListPage() {
       <ProductTable products={filteredProducts} onAddToCart={handleAddToCart} />
 
       <div style={{ marginTop: '20px', display: 'flex', gap: '8px', alignItems: 'center' }}>
-        <button onClick={handlePrev} disabled={currentPage === 0}>
+        <button onClick={goToPrevPage} disabled={currentPage === 0}>
           Prev
         </button>
 
         {Array.from({ length: totalPages }, (_, index) => (
           <button
             key={index}
-            onClick={() => handlePageClick(index)}
+            onClick={() => goToPage(index)}
             disabled={index === currentPage}
           >
             {index + 1}
           </button>
         ))}
 
-        <button onClick={handleNext} disabled={currentPage >= totalPages - 1}>
+        <button onClick={goToNextPage} disabled={currentPage >= totalPages - 1}>
           Next
         </button>
       </div>
