@@ -1,35 +1,24 @@
-import { useEffect, useState } from 'react';
-import { getProducts } from '../services/productService.js';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchProducts } from '../features/products/productSlice.js';
 import ProductTable from '../components/ProductTable.jsx';
 
 function ProductListPage() {
-  const [products, setProducts] = useState([]);
+  const dispatch = useDispatch();
+  const { items, loading, error } = useSelector((state) => state.products);
 
   useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const fetchProducts = async () => {
-    try {
-      const data = await getProducts();
-
-      if (Array.isArray(data)) {
-        setProducts(data);
-      } else if (Array.isArray(data.content)) {
-        setProducts(data.content);
-      } else {
-        setProducts([]);
-      }
-    } catch (error) {
-      console.error('Error fetching products:', error);
-      setProducts([]);
-    }
-  };
+    dispatch(fetchProducts());
+  }, [dispatch]);
 
   return (
     <div style={{ padding: '20px' }}>
       <h2>Product List</h2>
-      <ProductTable products={products} />
+
+      {loading && <p>Loading products...</p>}
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+
+      <ProductTable products={items} />
     </div>
   );
 }

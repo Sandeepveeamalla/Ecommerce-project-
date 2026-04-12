@@ -1,16 +1,19 @@
-import { createProduct } from '../services/productService.js';
-import ProductForm from '../components/ProductForm.jsx';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { addProduct } from '../features/products/productSlice.js';
+import ProductForm from '../components/ProductForm.jsx';
 
 function AddProductPage() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleProductCreated = async (product) => {
-    try {
-      await createProduct(product);
+    const resultAction = await dispatch(addProduct(product));
+
+    if (addProduct.fulfilled.match(resultAction)) {
       navigate('/products');
-    } catch (error) {
-      console.error('Error creating product:', error);
+    } else {
+      console.error('Error creating product');
     }
   };
 
