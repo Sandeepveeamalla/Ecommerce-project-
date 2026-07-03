@@ -41,13 +41,42 @@ public class CartItemService {
             throw new RuntimeException("Product not found");
         }
 
-        if (product.getStock() < cartItem.getQuantity()) {
+        Optional<CartItem> existingItem =
+                cartItemRepository.findByCartIdAndProductId(cartItem.getCartId(), cartItem.getProductId());
+
+        int requestedQuantity = cartItem.getQuantity();
+
+        if (existingItem.isPresent()) {
+            CartItem item = existingItem.get();
+            int newQuantity = item.getQuantity() + requestedQuantity;
+
+            if (product.getStock() < newQuantity) {
+                throw new RuntimeException("Not enough stock");
+            }
+
+            item.setQuantity(newQuantity);
+            CartItem updatedItem = cartItemRepository.save(item);
+
+            CartEvent event = new CartEvent(
+                    "ADD",
+                    updatedItem.getCartId(),
+                    updatedItem.getProductId(),
+                    requestedQuantity
+            );
+
+            kafkaProducerService.sendCartEvent(event);
+
+            return updatedItem;
+        }
+
+        if (product.getStock() < requestedQuantity) {
             throw new RuntimeException("Not enough stock");
         }
 
         CartItem savedItem = cartItemRepository.save(cartItem);
 
-        CartEvent event = new CartEvent("ADD",
+        CartEvent event = new CartEvent(
+                "ADD",
                 savedItem.getCartId(),
                 savedItem.getProductId(),
                 savedItem.getQuantity()
@@ -68,5 +97,24 @@ public class CartItemService {
 
     public List<CartItem> getCartItemsByCartId(Integer cartId) {
         return cartItemRepository.findByCartId(cartId);
+    }
+
+    public CartItem increaseQuantity(Integer id) {
+        CartItem item = cartItemRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Cart item not found with id: " + id));
+
+        item.setQuantity(item.getQuantity() + 1);
+        return cartItemRepository.save(item);
+    }
+
+    public CartItem decreaseQuantity(Integer id) {
+        CartItem item = cartItemRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Cart item not found with id: " + id));
+
+        if (item.getQuantity() > 1) {
+            item.setQuantity(item.getQuantity() - 1);
+        }
+
+        return cartItemRepository.save(item);
     }
 }

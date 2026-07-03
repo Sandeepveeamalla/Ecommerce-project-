@@ -13,7 +13,6 @@ public class CartKafkaConsumer {
     public void consume(CartEvent event) {
         log.info("Received Cart Event: {}", event);
 
-        // Example handling
         switch (event.getEventType()) {
             case "ADD":
                 log.info("Add item to cart: {}", event);
