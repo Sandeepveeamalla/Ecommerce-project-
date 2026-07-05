@@ -11,3 +11,13 @@ export const getCartItemsApi = async () => {
   const response = await axios.get(`${API_BASE_URL}/cart-items`);
   return response.data;
 };
+
+export const increaseCartItemApi = async (id) => {
+  const response = await axios.put(`${API_BASE_URL}/cart-items/${id}/increase`);
+  return response.data;
+};
+
+export const decreaseCartItemApi = async (id) => {
+  const response = await axios.put(`${API_BASE_URL}/cart-items/${id}/decrease`);
+  return response.data;
+};

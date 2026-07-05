@@ -34,6 +34,8 @@ function ProductListPage() {
 
         <input
           type="number"
+
+          min="0"
           placeholder="Filter by max price"
           value={maxPrice}
           onChange={(e) => setMaxPrice(e.target.value)}
